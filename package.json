@@ -1,0 +1,27 @@
+{
+  "name": "pulse",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "tsc && node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "install": "echo 'No hejka wariacie :)'",
+    "pulse-install": "ts-node src/install.ts",
+    "ass": "ts-node src/ass.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "pulse-install": "./dist/install.js",
+    "ass": "./dist/ass.js"
+  },
+  "author": "Damian Martyniak",
+  "license": "ISC",
+  "dependencies": {
+    "organ": "^0.3.5",
+    "ws": "^8.17.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.13.0"
+  }
+}
