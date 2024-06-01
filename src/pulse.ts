@@ -1,4 +1,4 @@
-import { Organ, bash, time } from "organ";
+import { Organ, bash, time } from "@livesin/vessel";
 import { readdir, writeFile } from "fs/promises";
 import { Service } from "./service";
 
@@ -110,9 +110,30 @@ export class Services {
 export class Pulse extends Organ {
   services = new Services();
 
+  cwd() {
+    return readdir(process.cwd());
+  }
+
   constructor() {
     super({
       statics: [],
+    });
+
+    this.wss.on("connection", (socket) => {
+      socket.on("message", (data) => {
+        const json = data.toString().trim();
+        const response = JSON.parse(json);
+
+        switch (response.command) {
+          default:
+            socket.send(
+              JSON.stringify({
+                text: "Hęęę??! - jeszcze nie potrafię odpowiedzieć :c",
+              })
+            );
+            break;
+        }
+      });
     });
 
     this.#setupHello();
