@@ -1,5 +1,5 @@
 {
-  "name": "@livesin/pulse",
+  "name": "@vivotech/pulse",
   "version": "0.0.1",
   "description": "",
   "main": "index.js",
@@ -18,7 +18,8 @@
   "author": "Damian Martyniak",
   "license": "ISC",
   "dependencies": {
-    "@livesin/vessel": "^1.0.0",
+    "@vivotech/artery": "^1.2.3",
+    "@vivotech/out": "^0.1.1",
     "ws": "^8.17.0"
   },
   "devDependencies": {

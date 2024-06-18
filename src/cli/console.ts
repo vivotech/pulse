@@ -1,32 +1,9 @@
+import { time } from "@vivotech/out";
 import WebSocket from "ws";
-import { log, time, terminal } from "@livesin/vessel";
 
 export function ui(name: string) {
   console.clear();
   console.log(`#####     ${name}     #####`);
-}
-
-export function filemanager() {
-  ui("ass manager");
-
-  const b = terminal.progressBar({
-    title: "fs",
-    percent: true,
-
-    eta: true,
-  });
-
-  let progress = 0;
-
-  const i = setInterval(() => {
-    progress += 0.19;
-
-    if (progress >= 1) {
-      clearInterval(i);
-    }
-
-    b.update(progress);
-  }, 12000);
 }
 
 export class Console {
@@ -41,8 +18,6 @@ export class Console {
 
       if (cmd === "exit") {
         process.exit(0);
-      } else if (cmd === "fs") {
-        filemanager();
       } else {
         this.send(cmd);
       }

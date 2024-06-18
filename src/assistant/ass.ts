@@ -1,4 +1,4 @@
-import { time } from "@livesin/vessel";
+import { time } from "@vivotech/out";
 import { Console } from "./console";
 
 if (process.argv[2]) {
