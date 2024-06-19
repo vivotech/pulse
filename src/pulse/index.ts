@@ -1,4 +1,4 @@
-import { Artery } from "@vivotech/artery";
+import { Artery } from "@vivotech/artery/dist/core";
 import { readdir } from "fs/promises";
 import { Arteries } from "../artery/arteries";
 import { Services } from "../service/services";

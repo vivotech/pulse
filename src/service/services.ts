@@ -1,6 +1,6 @@
 import { time } from "@vivotech/out";
 import { readFile, readdir, writeFile } from "fs/promises";
-import { bashAsync } from "../../../vivo/artery/src";
+import { bashAsync } from "@vivotech/artery/dist/common";
 import { Pulse } from "../pulse";
 import { ArteryService, Service, Unit, generateUnitFile } from "../service";
 
@@ -88,7 +88,9 @@ export class Services {
       | "start"
       | "stop"
   ) {
-    return await bashAsync("systemctl", [command, name]).catch(
+    return await bashAsync("systemctl", [command, name], {
+      user: "root",
+    }).catch(
       this.#error.bind(this, `Insufficient permissions to ${command} service`)
     );
   }

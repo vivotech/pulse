@@ -1,5 +1,4 @@
 import { time } from "@vivotech/out";
-import { bashAsync } from "../../../vivo/artery/src";
 import { Pulse } from "../pulse/index";
 import { ArteryService, Service } from "../service/index";
 import { install } from "../install/toInstall";
@@ -61,12 +60,6 @@ export class Arteries {
     } else {
       time("Artery service not found");
     }
-  }
-
-  async download(artery: ArteryService) {
-    const clone = await bashAsync("git", ["clone", artery.gitUrl], {
-      cwd: "/home/vivo",
-    });
   }
 
   provideServices(services: Service[]) {

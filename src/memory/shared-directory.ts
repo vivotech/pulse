@@ -1,5 +1,5 @@
 import { existsSync } from "fs";
-import { bashAsync } from "../../../vivo/artery/src";
+import { bashAsync } from "@vivotech/artery/dist/common";
 import { getLinuxUser } from "./user";
 import { time } from "@vivotech/out";
 
@@ -24,9 +24,9 @@ export class SharedDirectory {
     if (exists) {
       time(`Main directory detected`, { color: "cyan" });
     } else {
-      const mkdir = await bashAsync("mkdir", ["-p", this.path]).catch(
-        (e) => false
-      );
+      const mkdir = await bashAsync("mkdir", [this.path], {
+        user: "root",
+      }).catch((e) => false);
 
       if (!mkdir) {
         time("Failed to create shared directory", { color: "red" });
@@ -54,12 +54,14 @@ export class SharedDirectory {
   }
 
   async createGroup(groupname) {
-    await bashAsync(`groupadd`, [groupname]);
-    await bashAsync("chgrp", ["-R", groupname, this.path]);
-    await bashAsync("chmod", ["-R", "2775", this.path]);
+    await bashAsync(`groupadd`, [groupname], { user: "root" });
+    await bashAsync("chgrp", ["-R", groupname, this.path], { user: "root" });
+    await bashAsync("chmod", ["-R", "2775", this.path], { user: "root" });
   }
 
   async addUser(username: string) {
-    await bashAsync(`usermod`, ["-a", "-G", this.groupname, username]);
+    await bashAsync(`usermod`, ["-a", "-G", this.groupname, username], {
+      user: "root",
+    });
   }
 }

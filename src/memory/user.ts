@@ -1,5 +1,5 @@
 import { time } from "@vivotech/out";
-import { bashAsync } from "../../../vivo/artery/src";
+import { bashAsync } from "@vivotech/artery/dist/common";
 
 export async function getLinuxUser(username: string) {
   const debiExists = await bashAsync("id", ["-u", username])
@@ -8,10 +8,12 @@ export async function getLinuxUser(username: string) {
     .then((n) => typeof n === "number");
 
   if (!debiExists) {
-    const user = await bashAsync("useradd", [username]).catch((er) => {
-      time(er as string, { color: "red" });
-      return false;
-    });
+    const user = await bashAsync("useradd", [username], { user: "root" }).catch(
+      (er) => {
+        time(er as string, { color: "red" });
+        return false;
+      }
+    );
 
     if (user) {
       time(`${username} user created`);

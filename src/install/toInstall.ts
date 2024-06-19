@@ -1,6 +1,6 @@
 import { time } from "@vivotech/out";
 import { isTcpFree } from "../espionage";
-import { bashAsync } from "../../../vivo/artery/src";
+import { bashAsync } from "@vivotech/artery/dist/common";
 import { Pulse } from "../pulse";
 import { ArteryService } from "../service";
 import { existsSync } from "fs";
@@ -22,8 +22,7 @@ export async function install(pulse: Pulse, arteryService: ArteryService) {
       return false;
     });
 
-    if (!clone) {
-      time(`failed cloning ${pkgName}`, { color: "red" });
+    if (!existsSync(path)) {
       return;
     }
   }
