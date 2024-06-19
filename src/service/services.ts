@@ -3,21 +3,21 @@ import { readFile, readdir, writeFile } from "fs/promises";
 import { bashAsync } from "@vivotech/artery/dist/common";
 import { Pulse } from "../pulse";
 import { ArteryService, Service, Unit, generateUnitFile } from "../service";
+import { ArteryList } from "@vivotech/artery/dist/list";
 
 export const USER_SERVICES_PATH = "/etc/systemd/system";
 
-export class Services {
-  list: Service[] = [];
-
+export class Services extends ArteryList<Service, Pulse> {
   constructor(private pulse: Pulse) {
+    super("services", pulse);
     this.#actions(pulse);
   }
 
   get(name: string): Service {
-    return this.list.find(({ service: n }) => n.startsWith(name));
+    return this.all.find(({ service: n }) => n.startsWith(name));
   }
 
-  async init({ name, port }: ArteryService) {
+  async register({ name, port }: ArteryService) {
     const directoryName = name.split("/").pop();
 
     await this.#setServiceFile({
@@ -35,7 +35,7 @@ export class Services {
   async #doubleCheck(list: Service[]) {
     const response = list;
 
-    this.pulse.arteries.list.forEach(async (art) => {
+    this.pulse.arteries.all.forEach(async (art) => {
       const res = {
         enabled: (await this.sysctl(art.service, "is-enabled")) === "enabled",
         active: (await this.sysctl(art.service, "is-active")) === "active",
@@ -47,11 +47,11 @@ export class Services {
       if (index > -1) {
         response[index] = { ...response[index], ...res };
 
-        this.pulse.broadcast(response[index]);
-        this.init(art);
+        // this.pulse.broadcast(response[index]);
+        this.register(art);
       } else {
-        response.push({ ...res, installed: false });
-        this.pulse.broadcast({ ...res, installed: false });
+        response.push({ ...res, installed: false, id: "s" });
+        // this.pulse.broadcast({ ...res, installed: false });
       }
     });
 
@@ -64,6 +64,7 @@ export class Services {
 
     const list = services.map((name) => {
       const service = {
+        id: Math.random().toString(36).substring(7),
         installed: true,
         service: name,
         enabled: null,
@@ -87,7 +88,7 @@ export class Services {
       | "start"
       | "stop"
   ) {
-    return await bashAsync("systemctl", [command, name], {
+    return await bashAsync(["systemctl", command, name], {
       user: "root",
     }).catch(
       this.#error.bind(this, `Insufficient permissions to ${command} service`)
@@ -121,7 +122,7 @@ export class Services {
   }
 
   #actions(pulse: Pulse) {
-    pulse.get("/services", async () => this.list);
+    pulse.get("/services", async () => this.all);
 
     pulse.post(
       "/service",

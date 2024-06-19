@@ -13,7 +13,7 @@ export async function install(pulse: Pulse, arteryService: ArteryService) {
   if (existsSync(path)) {
     time(`Found ${path}`);
 
-    const pull = await bashAsync("git", ["pull"], {
+    const pull = await bashAsync(["git", "pull"], {
       cwd: pulse.dir.path,
     }).catch((e) => {
       time(e as string, { color: "red" });
@@ -22,7 +22,7 @@ export async function install(pulse: Pulse, arteryService: ArteryService) {
   } else {
     time(`cloning ${pkgName}`);
 
-    const clone = await bashAsync("git", ["clone", gitUrl], {
+    const clone = await bashAsync(["git", "clone", gitUrl], {
       cwd: pulse.dir.path,
     }).catch((e) => {
       time(e as string, { color: "red" });
@@ -36,7 +36,7 @@ export async function install(pulse: Pulse, arteryService: ArteryService) {
 
   time(`installing ${pkgName}`);
 
-  const npmI = await bashAsync("npm", ["i"], {
+  const npmI = await bashAsync(["npm", "i"], {
     cwd: path,
   }).catch(() => false);
 
@@ -52,7 +52,7 @@ export async function install(pulse: Pulse, arteryService: ArteryService) {
 
   if (!services.some((name) => name.service === service)) {
     time(`boot ${pkgName}`);
-    const s = pulse.arteries.list.find(({ name }) => name === service);
+    const s = pulse.arteries.all.find(({ name }) => name === service);
 
     if (s) {
       const res = await pulse.services.init(s);

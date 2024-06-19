@@ -1,89 +1,86 @@
 import { time } from "@vivotech/out";
+import { ArteryList } from "@vivotech/artery/dist/list";
 import { Pulse } from "../pulse/index";
 import { ArteryService, Service } from "../service/index";
 import { install } from "../install/toInstall";
+import { Artery } from "@vivotech/artery/dist/core";
 
-export class Arteries {
-  list: ArteryService[] = [
-    {
-      gitUrl: "git@github.com:vivotech/pulse.git",
-      service: "pulse.service",
-      name: "@vivotech/pulse",
-      installed: null,
-      enabled: null,
-      active: null,
-      port: 3963,
-    },
-    {
-      gitUrl: "git@github.com:vivotech/shepheard.git",
-      service: "shepheard.service",
-      name: "@vivotech/shepheard",
-      installed: null,
-      enabled: null,
-      active: null,
-      port: 3964,
-    },
-    {
-      gitUrl: "git@github.com:vivotech/memory.git",
-      service: "memory.service",
-      name: "@vivotech/memory",
-      installed: null,
-      enabled: null,
-      active: null,
-      port: 3965,
-    },
-  ];
+export class Arteries extends ArteryList<ArteryService, Pulse> {
+  constructor(private art: Pulse) {
+    super("arteries", art);
 
-  constructor(public pulse: Pulse) {
-    this.#actions(pulse);
+    this.#actions(art);
+
+    this.init([
+      {
+        gitUrl: "git@github.com:vivotech/pulse.git",
+        service: "pulse.service",
+        name: "@vivotech/pulse",
+        installed: null,
+        enabled: null,
+        active: null,
+        port: 3963,
+      },
+      {
+        gitUrl: "git@github.com:vivotech/shepheard.git",
+        service: "shepheard.service",
+        name: "@vivotech/shepheard",
+        installed: null,
+        enabled: null,
+        active: null,
+        port: 3964,
+      },
+      {
+        gitUrl: "git@github.com:vivotech/memory.git",
+        service: "memory.service",
+        name: "@vivotech/memory",
+        installed: null,
+        enabled: null,
+        active: null,
+        port: 3965,
+      },
+    ]);
   }
 
-  #actions(pulse: Pulse) {
-    pulse.get("/arteries", async () => this.list);
+  #actions(art: Pulse) {
+    art.get("/arteries", async () => this.all);
 
-    pulse.get("/artery", async (params, query) =>
-      this.list.find(({ name }) => query.name === name)
+    art.get("/artery", async (params, query) =>
+      this.all.find(({ service }) => service === query.name)
     );
 
-    pulse.post(
+    art.post(
       "/install",
-      async (params, query) => await this.install(pulse, query.name)
+      async (params, query) => await this.install(art, query.name)
     );
   }
 
-  async install(pulse: Pulse, name: string) {
+  async install(art: Pulse, name: string) {
     time(`install ${name}`);
-    const service = this.list.find(({ service }) => name === service);
+    const service = this.all.find(({ service }) => name === service);
 
     if (service) {
-      const i = await install(pulse, service);
+      const i = await install(art, service);
     } else {
       time("Artery service not found");
     }
   }
 
   provideServices(services: Service[]) {
-    this.list.forEach((artery) => {
-      const service = services.find((s) => s.service === artery.service);
+    for (const service of services) {
+      const artery = this.all.find(
+        ({ service: ser }) => ser === service.service
+      );
 
-      if (service) {
-        artery.enabled = service.enabled;
-        artery.active = service.active;
-        artery.installed = true;
-
-        this.pulse.broadcast(artery);
-      }
-    });
-  }
-
-  #updateArteries(arteries: ArteryService[]) {
-    for (const artery of arteries) {
-      const index = this.list.findIndex((a) => a.name === artery.name);
-
-      if (index !== -1) {
-        this.list[index] = artery;
-      } else {
-        this.list.push(artery);
+      if (artery) {
+        this.update([
+          {
+            ...artery,
+            installed: true,
+            enabled: true,
+            active: true,
+          },
+        ]);
       }
     }
   }

@@ -1,4 +1,6 @@
-export interface Service {
+import { ArteryListItem } from "@vivotech/artery/dist/list";
+
+export interface Service extends ArteryListItem {
   installed: boolean | null;
   enabled: boolean | null;
   active: boolean | null;

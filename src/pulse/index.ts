@@ -23,7 +23,7 @@ export class Pulse extends Artery {
 
     install(
       this,
-      this.arteries.list.find(({ name }) => name === "@vivotech/pulse")
+      this.arteries.all.find(({ name }) => name === "@vivotech/pulse")
     );
 
     this.services.check().then((list) => this.arteries.provideServices(list));

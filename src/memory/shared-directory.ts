@@ -24,7 +24,7 @@ export class SharedDirectory {
     if (exists) {
       time(`Main directory detected`, { color: "cyan" });
     } else {
-      const mkdir = await bashAsync("mkdir", [this.path], {
+      const mkdir = await bashAsync(["mkdir", this.path], {
         user: "root",
       }).catch((e) => false);
 
@@ -54,13 +54,13 @@ export class SharedDirectory {
   }
 
   async createGroup(groupname) {
-    await bashAsync(`groupadd`, [groupname], { user: "root" });
-    await bashAsync("chgrp", ["-R", groupname, this.path], { user: "root" });
-    await bashAsync("chmod", ["-R", "2775", this.path], { user: "root" });
+    await bashAsync([`groupadd`, groupname], { user: "root" });
+    await bashAsync(["chgrp", "-R", groupname, this.path], { user: "root" });
+    await bashAsync(["chmod", "-R", "2775", this.path], { user: "root" });
   }
 
   async addUser(username: string) {
-    await bashAsync(`usermod`, ["-a", "-G", this.groupname, username], {
+    await bashAsync([`usermod`, "-a", "-G", this.groupname, username], {
       user: "root",
     });
   }
