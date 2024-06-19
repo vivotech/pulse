@@ -1,5 +1,5 @@
 import { Pulse } from "./pulse";
-import { init } from "@vivotech/artery";
+import { init } from "@vivotech/artery/dist/core";
 
 const pulse = new Pulse();
 
