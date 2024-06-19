@@ -12,6 +12,13 @@ export async function install(pulse: Pulse, arteryService: ArteryService) {
 
   if (existsSync(path)) {
     time(`Found ${path}`);
+
+    const pull = await bashAsync("git", ["pull"], {
+      cwd: pulse.dir.path,
+    }).catch((e) => {
+      time(e as string, { color: "red" });
+      return false;
+    });
   } else {
     time(`cloning ${pkgName}`);
 

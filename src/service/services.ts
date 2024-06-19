@@ -46,9 +46,12 @@ export class Services {
 
       if (index > -1) {
         response[index] = { ...response[index], ...res };
+
+        this.pulse.broadcast(response[index]);
         this.init(art);
       } else {
         response.push({ ...res, installed: false });
+        this.pulse.broadcast({ ...res, installed: false });
       }
     });
 
@@ -59,20 +62,16 @@ export class Services {
     const servicesDirectory = await readdir(USER_SERVICES_PATH);
     const services = servicesDirectory.filter((name) => name.startsWith(name));
 
-    const list = await Promise.all(
-      services.map(async (name) => {
-        const service = {
-          installed: true,
-          service: name,
-          enabled: null,
-          active: null,
-        };
+    const list = services.map((name) => {
+      const service = {
+        installed: true,
+        service: name,
+        enabled: null,
+        active: null,
+      };
 
-        return service;
-      })
-    );
-
-    this.list = [...list];
+      return service;
+    });
 
     return this.#doubleCheck(list);
   }

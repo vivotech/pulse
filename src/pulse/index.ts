@@ -4,6 +4,7 @@ import { Arteries } from "../artery/arteries";
 import { Services } from "../service/services";
 import { send } from "./socket";
 import { SharedDirectory } from "../memory/shared-directory";
+import { install } from "../install/toInstall";
 
 export class Pulse extends Artery {
   dir = new SharedDirectory("/home/.debi");
@@ -19,6 +20,11 @@ export class Pulse extends Artery {
     super({
       statics: ["/home/dev/sources/pulse-ui/dist/browser"],
     });
+
+    install(
+      this,
+      this.arteries.list.find(({ name }) => name === "@vivotech/pulse")
+    );
 
     this.services.check().then((list) => this.arteries.provideServices(list));
 
