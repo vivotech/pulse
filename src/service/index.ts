@@ -15,6 +15,8 @@ export interface Unit {
 
 export interface ArteryService extends Service {
   port: number | null;
+  version?: string;
+  gitUrl: string;
   name: string;
 }
 
@@ -23,15 +25,15 @@ export function generateUnitFile(unit: Unit) {
   return `[Unit]
 
 Description=${unit.description}
-After=network.target                  
+After=network.target
 
-[Service] 
+[Service]
 WorkingDirectory=${unit.directory}
 ExecStart=${unit.command}
 Type=exec
 Restart=${unit.restart}
-RestartSec=${unit.restartTimeout}s                                  
-                                                    
-[Install]                                                           
+RestartSec=${unit.restartTimeout}s
+
+[Install]
 WantedBy=multi-user.target`;
 }

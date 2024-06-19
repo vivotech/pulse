@@ -1,10 +1,13 @@
 import { Artery } from "@vivotech/artery";
 import { readdir } from "fs/promises";
-import { Arteries } from "./arteries";
-import { Services } from "./services";
+import { Arteries } from "../artery/arteries";
+import { Services } from "../service/services";
 import { send } from "./socket";
+import { SharedDirectory } from "../memory/shared-directory";
 
 export class Pulse extends Artery {
+  dir = new SharedDirectory("/home/.debi");
+
   services = new Services(this);
   arteries = new Arteries(this);
 
@@ -14,12 +17,10 @@ export class Pulse extends Artery {
 
   constructor() {
     super({
-      statics: [],
+      statics: ["/home/dev/sources/pulse-ui/dist/browser"],
     });
 
-    this.services
-      .check()
-      .then(() => this.arteries.provideServices(this.services.list));
+    this.services.check().then((list) => this.arteries.provideServices(list));
 
     this.wss.on("connection", (socket) => {
       socket.on("message", (data) => {

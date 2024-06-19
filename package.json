@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "tsc && node dist/index.js",
-    "dev": "ts-node src/index.ts",
+    "start": "tsc && node dist/init.js",
+    "dev": "ts-node src/init.ts 3963",
+    "service": "ts-node src/init.ts",
     "install": "echo 'No hejka wariacie :)'",
     "pulse-install": "ts-node src/install.ts",
     "ass": "ts-node src/ass.ts",
