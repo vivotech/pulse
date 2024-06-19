@@ -1,9 +1,8 @@
 import { time } from "@vivotech/out";
-import { bash } from "@vivotech/artery";
 import { readFile, readdir, writeFile } from "fs/promises";
+import { bashAsync } from "../../../vivo/artery/src";
 import { Pulse } from "../pulse";
 import { ArteryService, Service, Unit, generateUnitFile } from "../service";
-import { bashAsync } from "../../../vivo/artery/src";
 
 export const USER_SERVICES_PATH = "/etc/systemd/system";
 
