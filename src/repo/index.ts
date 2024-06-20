@@ -1,15 +1,9 @@
-import { ArteryList } from "@vivotech/artery/dist/list";
-import { Pulse } from "../pulse";
-import { Repository } from "./repository";
-import { readdirSync } from "fs";
-import { time } from "@vivotech/out";
 import { bashAsync } from "@vivotech/artery/dist/common";
+import { readdirSync } from "fs";
+import { ArteryList } from "@vivotech/artery/dist/list";
+import { Repository } from "./repository";
 
-export class Repositories extends ArteryList<Repository, Pulse> {
-  constructor(pulse: Pulse) {
-    super("repositories", pulse);
-  }
-
+export class Repositories extends ArteryList<Repository> {
   async load(path: string): Promise<Repository[]> {
     const names = this.#loadRepositories(path);
     const repos = await this.#analyzeRepositories(names);

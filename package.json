@@ -19,7 +19,7 @@
   "author": "Damian Martyniak",
   "license": "ISC",
   "dependencies": {
-    "@vivotech/artery": "^1.5.0",
+    "@vivotech/artery": "^1.5.3",
     "@vivotech/out": "^0.1.1",
     "ws": "^8.17.0"
   },

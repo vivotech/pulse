@@ -8,8 +8,8 @@ import { readdirSync } from "fs";
 import { bashAsync } from "@vivotech/artery/dist/common";
 
 export class Arteries extends ArteryList<NpmPackage, Pulse> {
-  constructor(private art: Pulse) {
-    super("arteries", art);
+  constructor(signature: string, private art: Pulse) {
+    super(signature, art);
 
     this.init(DEFAULT_ARTERIES);
     this.#actions(art);
@@ -20,7 +20,7 @@ export class Arteries extends ArteryList<NpmPackage, Pulse> {
 
     art.post(
       "/install",
-      async (params, query) => await this.install(art, query.name)
+      async (params, query) => await this.install(art, query.name as string)
     );
   }
 

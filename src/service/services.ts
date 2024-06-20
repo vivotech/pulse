@@ -5,6 +5,7 @@ import { Pulse } from "../pulse";
 import { NpmPackage, Service, Unit, generateUnitFile } from "../service";
 import { ArteryList } from "@vivotech/artery/dist/list";
 import { existsSync } from "fs";
+import { Arteries } from "../artery/arteries";
 
 export const USER_SERVICES_PATH = "/etc/systemd/system";
 
@@ -13,8 +14,8 @@ export function toServiceName(name: string) {
 }
 
 export class Services extends ArteryList<Service, Pulse> {
-  constructor(private pulse: Pulse) {
-    super("services", pulse);
+  constructor(public signature: string, public pulse: Pulse) {
+    super(signature, pulse);
     this.#actions(pulse);
   }
 
@@ -42,29 +43,32 @@ export class Services extends ArteryList<Service, Pulse> {
   async #doubleCheck(list: Service[]) {
     const response = list;
 
-    this.pulse.arteries.all().forEach(async (art) => {
-      const res = {
-        enabled:
-          (await this.sysctl(toServiceName(art.name), "is-enabled")) ===
-          "enabled",
-        active:
-          (await this.sysctl(toServiceName(art.name), "is-active")) ===
-          "active",
-        service: art.name,
-      };
+    this.pulse
+      .inject<Arteries>("arteries")
+      .all()
+      .forEach(async (art) => {
+        const res = {
+          enabled:
+            (await this.sysctl(toServiceName(art.name), "is-enabled")) ===
+            "enabled",
+          active:
+            (await this.sysctl(toServiceName(art.name), "is-active")) ===
+            "active",
+          service: art.name,
+        };
 
-      const index = response.findIndex((s) => s.service === art.name);
+        const index = response.findIndex((s) => s.service === art.name);
 
-      if (index > -1) {
-        response[index] = { ...response[index], ...res };
+        if (index > -1) {
+          response[index] = { ...response[index], ...res };
 
-        // this.pulse.broadcast(response[index]);
-        this.register(art);
-      } else {
-        response.push({ ...res, installed: false, id: "s" });
-        // this.pulse.broadcast({ ...res, installed: false });
-      }
-    });
+          // this.pulse.broadcast(response[index]);
+          this.register(art);
+        } else {
+          response.push({ ...res, installed: false, id: "s" });
+          // this.pulse.broadcast({ ...res, installed: false });
+        }
+      });
 
     return response;
   }
@@ -138,7 +142,10 @@ export class Services extends ArteryList<Service, Pulse> {
     pulse.post(
       "/service",
       async (params, query) =>
-        await this.sysctl(toServiceName(query.name), query.state)
+        await this.sysctl(
+          toServiceName(query.name as string),
+          query.state as "start"
+        )
     );
   }
 }

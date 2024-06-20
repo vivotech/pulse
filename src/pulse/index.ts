@@ -5,12 +5,10 @@ import { Arteries } from "../artery/arteries";
 import { SharedDirectory } from "../memory/shared-directory";
 import { Repositories } from "../repo";
 import { Services } from "../service/services";
+import { ArteryList } from "@vivotech/artery/dist/list";
 
 export class Pulse extends Artery {
   dir = new SharedDirectory("/home/.debi");
-  repositories = new Repositories(this);
-  services = new Services(this);
-  arteries = new Arteries(this);
 
   cwd() {
     return readdir(process.cwd());
@@ -18,14 +16,18 @@ export class Pulse extends Artery {
 
   constructor() {
     super({
-      statics: [],
+      lists: {
+        repositories: Repositories,
+        services: Services,
+        arteries: Arteries,
+      } as { [key: string]: typeof ArteryList },
     });
 
     this.#start();
   }
 
   async #start() {
-    const services = await this.services.check();
+    const services = await this.inject<Services>("services").check();
 
     time(
       `[PULSE] ${
@@ -37,7 +39,7 @@ export class Pulse extends Artery {
 
     const path = await this.dir.init();
 
-    const repos = await this.repositories.load(path);
+    const repos = await this.inject<Repositories>("repositories").load(path);
     const behind = repos.filter((repo) => repo.behind);
 
     time(
@@ -48,7 +50,8 @@ export class Pulse extends Artery {
       })`
     );
 
-    const detected = this.arteries.provideRepositories(repos);
+    const detected =
+      this.inject<Arteries>("arteries").provideRepositories(repos);
 
     time(`[PULSE] ${detected.length} arteries detected`);
   }
