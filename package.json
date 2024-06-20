@@ -1,6 +1,6 @@
 {
   "name": "@vivotech/pulse",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "",
   "scripts": {
     "start": "tsc && node dist/init.js",

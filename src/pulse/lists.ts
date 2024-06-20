@@ -1,9 +1,8 @@
-import { Arteries } from "../artery/arteries";
-import { Repositories } from "../repo";
-import { Services } from "../service/services";
+import { Repository } from "../repo/repository";
+import { NpmPackage, Service } from "../service";
 
 export type PulseLists = {
-  repositories: Repositories;
-  services: Services;
-  arteries: Arteries;
+  repositories: Repository[];
+  arteries: NpmPackage[];
+  services: Service[];
 };
