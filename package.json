@@ -1,6 +1,6 @@
 {
   "name": "@vivotech/pulse",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "",
   "scripts": {
     "start": "tsc && node dist/init.js",
@@ -12,6 +12,9 @@
     "as": "ts-node src/assistant/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "files": [
+    "dist"
+  ],
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
