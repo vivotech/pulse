@@ -1,14 +1,14 @@
 import { Artery } from "@vivotech/artery/dist/core";
+import { time } from "@vivotech/out";
 import { readdir } from "fs/promises";
 import { Arteries } from "../artery/arteries";
-import { Services } from "../service/services";
-import { send } from "./socket";
 import { SharedDirectory } from "../memory/shared-directory";
-import { install } from "../install/toInstall";
+import { Repositories } from "../repo";
+import { Services } from "../service/services";
 
 export class Pulse extends Artery {
   dir = new SharedDirectory("/home/.debi");
-
+  repositories = new Repositories(this);
   services = new Services(this);
   arteries = new Arteries(this);
 
@@ -18,42 +18,38 @@ export class Pulse extends Artery {
 
   constructor() {
     super({
-      statics: ["/home/dev/sources/pulse-ui/dist/browser"],
+      statics: [],
     });
 
-    install(
-      this,
-      this.arteries.all.find(({ name }) => name === "@vivotech/pulse")
+    this.#start();
+  }
+
+  async #start() {
+    const services = await this.services.check();
+
+    time(
+      `[PULSE] ${
+        services.length
+          ? services.length + " services installed"
+          : "No services found"
+      }`
     );
 
-    this.services.check().then((list) => this.arteries.provideServices(list));
+    const path = await this.dir.init();
 
-    this.wss.on("connection", (socket) => {
-      socket.on("message", (data) => {
-        const json = data.toString().trim();
-        const response = JSON.parse(json);
+    const repos = await this.repositories.load(path);
+    const behind = repos.filter((repo) => repo.behind);
 
-        switch (response.command) {
-          default:
-            return send(socket, {
-              text: "Hęęę??! - jeszcze nie potrafię odpowiedzieć :c",
-            });
-        }
-      });
-    });
+    time(
+      `[PULSE] Found ${repos.length} programs (${
+        behind.length
+          ? behind.length + " have updates available"
+          : "all are up to date"
+      })`
+    );
+
+    const detected = this.arteries.provideRepositories(repos);
+
+    time(`[PULSE] ${detected.length} arteries detected`);
   }
 }
-
-/*
-  #todo() {
-    time("[x] check available services");
-    time("[x] need to can create new services");
-    time("[ ] some cli for creating projects");
-
-    time("[ ] interface for viewing services");
-    time("[ ] connect with compact db service (memory)");
-
-    time("[ ] can list available services (with socket updates)");
-    time("[ ] can stop/start service");
-  }
-*/

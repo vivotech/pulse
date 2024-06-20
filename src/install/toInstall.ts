@@ -2,31 +2,27 @@ import { time } from "@vivotech/out";
 import { isTcpFree } from "../espionage";
 import { bashAsync } from "@vivotech/artery/dist/common";
 import { Pulse } from "../pulse";
-import { ArteryService } from "../service";
 import { existsSync } from "fs";
+import { NpmPackage } from "../service";
 
-export async function install(pulse: Pulse, arteryService: ArteryService) {
-  const { service, port, name: pkgName, gitUrl } = arteryService;
+export async function install(pulse: Pulse, arteryService: NpmPackage) {
+  const { port, name: pkgName, gitUrl } = arteryService;
   const directoryName = pkgName.split("/").pop();
   const path = `${pulse.dir.path}/${directoryName}`;
 
   if (existsSync(path)) {
-    time(`Found ${path}`);
+    time(`[GIT] Pull command for ${path}`);
 
-    const pull = await bashAsync(["git", "pull"], {
-      cwd: pulse.dir.path,
-    }).catch((e) => {
-      time(e as string, { color: "red" });
-      return false;
+    await bashAsync(["git", "pull"], { cwd: path }).catch((e) => {
+      time(`[GIT] ${e}` as string, { color: "red" });
     });
   } else {
-    time(`cloning ${pkgName}`);
+    time(`[GIT] Clone command for ${pkgName}`);
 
-    const clone = await bashAsync(["git", "clone", gitUrl], {
+    await bashAsync(["git", "clone", gitUrl], {
       cwd: pulse.dir.path,
     }).catch((e) => {
-      time(e as string, { color: "red" });
-      return false;
+      time(`[GIT] ${pkgName} ${gitUrl} ${e}`, { color: "red" });
     });
 
     if (!existsSync(path)) {
@@ -34,54 +30,48 @@ export async function install(pulse: Pulse, arteryService: ArteryService) {
     }
   }
 
-  time(`installing ${pkgName}`);
+  time(`[NPM] ${pkgName} install`);
 
   const npmI = await bashAsync(["npm", "i"], {
     cwd: path,
   }).catch(() => false);
 
-  time("installation " + (npmI ? "success" : "failed"), {
+  time(`[NPM] ${pkgName} installation ${npmI ? "success" : "failed"}`, {
     color: npmI ? "green" : "red",
   });
 
-  time("Look for systemd services");
+  time("[SYSTEMD] Look for systemd services");
 
   const services = await pulse.services.check();
 
-  time(`Found ${services.length} services`);
+  time(`[SYSTEMD] Found ${services.length} services`);
 
-  if (!services.some((name) => name.service === service)) {
-    time(`boot ${pkgName}`);
-    const s = pulse.arteries.all.find(({ name }) => name === service);
+  if (!services.some((name) => name.service === pkgName)) {
+    time(`[SYSTEMD] boot ${pkgName}`, { color: "cyan" });
+    const s = pulse.arteries.all.find(({ name }) => name === pkgName);
 
     if (s) {
-      const res = await pulse.services.init(s);
-      time(res);
+      const res = await pulse.services.register(s);
+      time(`[SYSTEMD] ${res}`);
     } else {
-      time(`Init ${service}`, { color: "cyan" });
-      pulse.services.init(arteryService);
+      time(`[SYSTEMD] Init ${pkgName}`, { color: "cyan" });
+      pulse.services.register(arteryService);
     }
   } else {
-    time(`${pkgName} already installed`);
+    // time(`[SYSTEMD] ${pkgName} already installed`);
   }
 
-  const notSureService = pulse.services.get(service);
+  const { active, enabled } = pulse.services.get(pkgName) ?? {};
 
-  if (notSureService) {
-    const { active, enabled } = notSureService;
+  const pid = isTcpFree(port);
 
-    const pid = isTcpFree(port);
-
-    if (!pid) {
-      time(
-        `${pkgName} is ${active ? "" : "not"} active, and ${
-          enabled ? "" : "not"
-        } enabled`
-      );
-    } else {
-      time(`${pkgName} is running on port ${port}`);
-    }
+  if (!pid) {
+    time(
+      `[SYSTEMD] ${pkgName} is ${active ? "" : "not"} active, and ${
+        enabled ? "" : "not"
+      } enabled`
+    );
   } else {
-    time("Service not found", { color: "red" });
+    time(`[PROCESS] ${pkgName} is running on port ${port}`);
   }
 }

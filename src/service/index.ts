@@ -15,10 +15,11 @@ export interface Unit {
   name: string;
 }
 
-export interface ArteryService extends Service {
+export interface NpmPackage extends ArteryListItem {
   port: number | null;
   version?: string;
   gitUrl: string;
+  path?: string;
   name: string;
 }
 

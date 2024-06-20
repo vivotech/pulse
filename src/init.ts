@@ -5,4 +5,6 @@ const pulse = new Pulse();
 
 // pulse.services.check("pulse.service");
 
+console.clear();
+
 init(pulse);

@@ -6,51 +6,57 @@ import { time } from "@vivotech/out";
 export class SharedDirectory {
   groupname = "vivo";
 
-  constructor(public path: string) {
-    this.init();
-  }
+  constructor(public path: string) {}
 
-  async init() {
+  async init(): Promise<string | null> {
     const user = await getLinuxUser("debi");
 
     if (user) {
-      await this.#makeSureMainDirectoryExists();
+      return await this.#makeSureMainDirectoryExists();
+    } else {
+      return null;
     }
   }
 
   async #makeSureMainDirectoryExists() {
     const exists = existsSync(this.path);
+    let path = null;
 
     if (exists) {
-      time(`Main directory detected`, { color: "cyan" });
+      time(`[DIR] Main directory detected`, { color: "cyan" });
+      path = this.path;
     } else {
       const mkdir = await bashAsync(["mkdir", this.path], {
         user: "root",
       }).catch((e) => false);
 
       if (!mkdir) {
-        time("Failed to create shared directory", { color: "red" });
+        time("[DIR] Failed to create shared directory", { color: "red" });
+        path = null;
       } else {
-        time(mkdir as any, { color: "green" });
+        time(`[DIR] ${mkdir}`, { color: "green" });
+        path = this.path;
       }
 
       const createGroup = await this.createGroup(this.groupname).catch((e) => {
-        time(e as string, { color: "red" });
+        time(`[DIR] ${e}`, { color: "red" });
         return false;
       });
 
       if (createGroup) {
-        time(createGroup as any, { color: "green" });
+        time(`[DIR] ${createGroup}`, { color: "green" });
       }
 
       const addUser = await this.addUser("debi").catch((e) => ({ error: e }));
 
       if (addUser && "error" in addUser) {
-        time(addUser.error, { color: "red" });
+        time(`[DIR] ${addUser.error}`, { color: "red" });
       } else {
-        time(addUser as any, { color: "green" });
+        time(`[DIR] ${addUser}`, { color: "green" });
       }
     }
+
+    return path;
   }
 
   async createGroup(groupname) {

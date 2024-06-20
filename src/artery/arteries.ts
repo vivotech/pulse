@@ -1,53 +1,22 @@
-import { time } from "@vivotech/out";
 import { ArteryList } from "@vivotech/artery/dist/list";
+import { time } from "@vivotech/out";
 import { Pulse } from "../pulse/index";
-import { ArteryService, Service } from "../service/index";
-import { install } from "../install/toInstall";
-import { Artery } from "@vivotech/artery/dist/core";
+import { Repository } from "../repo/repository";
+import { NpmPackage } from "../service";
+import { DEFAULT_ARTERIES } from "./defaults";
+import { readdirSync } from "fs";
+import { bashAsync } from "@vivotech/artery/dist/common";
 
-export class Arteries extends ArteryList<ArteryService, Pulse> {
+export class Arteries extends ArteryList<NpmPackage, Pulse> {
   constructor(private art: Pulse) {
     super("arteries", art);
 
+    this.init(DEFAULT_ARTERIES);
     this.#actions(art);
-
-    this.init([
-      {
-        gitUrl: "git@github.com:vivotech/pulse.git",
-        service: "pulse.service",
-        name: "@vivotech/pulse",
-        installed: null,
-        enabled: null,
-        active: null,
-        port: 3963,
-      },
-      {
-        gitUrl: "git@github.com:vivotech/shepheard.git",
-        service: "shepheard.service",
-        name: "@vivotech/shepheard",
-        installed: null,
-        enabled: null,
-        active: null,
-        port: 3964,
-      },
-      {
-        gitUrl: "git@github.com:vivotech/memory.git",
-        service: "memory.service",
-        name: "@vivotech/memory",
-        installed: null,
-        enabled: null,
-        active: null,
-        port: 3965,
-      },
-    ]);
   }
 
   #actions(art: Pulse) {
     art.get("/arteries", async () => this.all);
-
-    art.get("/artery", async (params, query) =>
-      this.all.find(({ service }) => service === query.name)
-    );
 
     art.post(
       "/install",
@@ -56,32 +25,50 @@ export class Arteries extends ArteryList<ArteryService, Pulse> {
   }
 
   async install(art: Pulse, name: string) {
-    time(`install ${name}`);
-    const service = this.all.find(({ service }) => name === service);
+    time(`[ART] install ${name}`);
+    // const service = this.all.find(({ service }) => name === service);
 
-    if (service) {
-      const i = await install(art, service);
-    } else {
-      time("Artery service not found");
-    }
+    // if (service) {
+    time(`[ART] install service ${name} not supported yet`, {
+      color: "yellow",
+    });
+    // const i = await install(art, service);
+    // } else {
+    //  time("[ART] Artery service not found");
+    // }
   }
 
-  provideServices(services: Service[]) {
-    for (const service of services) {
-      const artery = this.all.find(
-        ({ service: ser }) => ser === service.service
-      );
+  provideRepositories(repositories: Repository[]): NpmPackage[] {
+    if (repositories.length) {
+      const detected = [];
 
-      if (artery) {
-        this.update([
-          {
-            ...artery,
-            installed: true,
-            enabled: true,
-            active: true,
-          },
-        ]);
+      for (const repo of repositories) {
+        const dir = readdirSync(repo.path);
+
+        if (dir.includes("package.json")) {
+          const pkg = require(`${repo.path}/package.json`);
+          const artery = this.all.find(({ name }) => name === pkg.name);
+
+          if (artery) {
+            time(`[ART] ${artery.name} detected`, {
+              color: "green",
+            });
+
+            detected.push({ ...artery, path: repo.path });
+          }
+        } else {
+          time(`[ART] No package.json found`, { color: "yellow" });
+        }
       }
+
+      if (detected.length) {
+        this.update(detected);
+      }
+
+      return detected;
     }
+
+    time(`[ART] No repositories to analyze`, { color: "yellow" });
+    return [];
   }
 }
