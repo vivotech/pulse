@@ -48,7 +48,7 @@ export async function install(pulse: Pulse, arteryService: NpmPackage) {
 
   if (!services.some((name) => name.service === pkgName)) {
     time(`[SYSTEMD] boot ${pkgName}`, { color: "cyan" });
-    const s = pulse.arteries.all.find(({ name }) => name === pkgName);
+    const s = pulse.arteries.all().find(({ name }) => name === pkgName);
 
     if (s) {
       const res = await pulse.services.register(s);

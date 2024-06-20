@@ -5,5 +5,5 @@ const _ = new Pulse();
 
 install(
   _,
-  _.arteries.all.find(({ name }) => name === "@vivotech/pulse")
+  _.arteries.all().find(({ name }) => name === "@vivotech/pulse")
 );

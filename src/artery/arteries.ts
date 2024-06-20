@@ -16,7 +16,7 @@ export class Arteries extends ArteryList<NpmPackage, Pulse> {
   }
 
   #actions(art: Pulse) {
-    art.get("/arteries", async () => this.all);
+    art.get("/arteries", async () => this.all());
 
     art.post(
       "/install",
@@ -26,7 +26,7 @@ export class Arteries extends ArteryList<NpmPackage, Pulse> {
 
   async install(art: Pulse, name: string) {
     time(`[ART] install ${name}`);
-    // const service = this.all.find(({ service }) => name === service);
+    // const service = this.all().find(({ service }) => name === service);
 
     // if (service) {
     time(`[ART] install service ${name} not supported yet`, {
@@ -47,7 +47,7 @@ export class Arteries extends ArteryList<NpmPackage, Pulse> {
 
         if (dir.includes("package.json")) {
           const pkg = require(`${repo.path}/package.json`);
-          const artery = this.all.find(({ name }) => name === pkg.name);
+          const artery = this.all().find(({ name }) => name === pkg.name);
 
           if (artery) {
             time(`[ART] ${artery.name} detected`, {

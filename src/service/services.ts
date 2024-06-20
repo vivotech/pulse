@@ -19,7 +19,9 @@ export class Services extends ArteryList<Service, Pulse> {
   }
 
   get(name: string): Service {
-    return this.all.find(({ service: n }) => n.startsWith(toServiceName(name)));
+    return this.all().find(({ service: n }) =>
+      n.startsWith(toServiceName(name))
+    );
   }
 
   async register({ name, port }: NpmPackage) {
@@ -40,7 +42,7 @@ export class Services extends ArteryList<Service, Pulse> {
   async #doubleCheck(list: Service[]) {
     const response = list;
 
-    this.pulse.arteries.all.forEach(async (art) => {
+    this.pulse.arteries.all().forEach(async (art) => {
       const res = {
         enabled:
           (await this.sysctl(toServiceName(art.name), "is-enabled")) ===
@@ -131,7 +133,7 @@ export class Services extends ArteryList<Service, Pulse> {
   }
 
   #actions(pulse: Pulse) {
-    pulse.get("/services", async () => this.all);
+    pulse.get("/services", async () => this.all());
 
     pulse.post(
       "/service",

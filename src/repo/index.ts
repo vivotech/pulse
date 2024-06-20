@@ -25,7 +25,7 @@ export class Repositories extends ArteryList<Repository, Pulse> {
 
     this.init(names);
 
-    return this.all;
+    return this.all();
   }
 
   async #analyzeRepositories(repositories: Repository[]) {
@@ -53,6 +53,6 @@ export class Repositories extends ArteryList<Repository, Pulse> {
       ]);
     }
 
-    return this.all;
+    return this.all();
   }
 }
