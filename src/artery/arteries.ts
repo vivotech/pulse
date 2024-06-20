@@ -1,11 +1,10 @@
 import { ArteryList } from "@vivotech/artery/dist/list";
 import { time } from "@vivotech/out";
+import { readdirSync } from "fs";
 import { Pulse } from "../pulse/index";
 import { Repository } from "../repo/repository";
 import { NpmPackage } from "../service";
 import { DEFAULT_ARTERIES } from "./defaults";
-import { readdirSync } from "fs";
-import { bashAsync } from "@vivotech/artery/dist/common";
 
 export class Arteries extends ArteryList<NpmPackage, Pulse> {
   constructor(signature: string, private art: Pulse) {

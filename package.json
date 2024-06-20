@@ -2,28 +2,29 @@
   "name": "@vivotech/pulse",
   "version": "0.2.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
     "start": "tsc && node dist/init.js",
     "dev": "ts-node src/init.ts 3963",
     "service": "ts-node src/init.ts",
+    "build": "tsup",
     "install": "echo 'No hejka wariacie :)'",
     "pulse-install": "ts-node src/install.ts",
-    "ass": "ts-node src/ass.ts",
+    "as": "ts-node src/assistant/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "bin": {
-    "pulse-install": "./dist/install.js",
-    "ass": "./dist/ass.js"
-  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "author": "Damian Martyniak",
   "license": "ISC",
   "dependencies": {
-    "@vivotech/artery": "^1.5.3",
+    "@vivotech/artery": "^1.5.2",
     "@vivotech/out": "^0.1.1",
     "ws": "^8.17.0"
   },
   "devDependencies": {
-    "@types/node": "^20.13.0"
+    "@types/node": "^20.13.0",
+    "tsup": "^8.1.0",
+    "typescript": "^5.5.2"
   }
 }

@@ -1,7 +1,8 @@
 import { bashAsync } from "@vivotech/artery/dist/common";
-import { readdirSync } from "fs";
+import { existsSync, readdirSync } from "fs";
 import { ArteryList } from "@vivotech/artery/dist/list";
 import { Repository } from "./repository";
+import { time } from "@vivotech/out";
 
 export class Repositories extends ArteryList<Repository> {
   async load(path: string): Promise<Repository[]> {
@@ -24,27 +25,43 @@ export class Repositories extends ArteryList<Repository> {
 
   async #analyzeRepositories(repositories: Repository[]) {
     for (const repository of repositories) {
-      const remote = (await bashAsync(["git", "remote", "-v"])) as string;
-      const [push, pull] = remote.split(" ");
-      const [type, git] = pull.split("\n");
-      const [upstream, url] = git.split("\t");
+      const remote = (await bashAsync(["git", "remote", "-v"], {
+        cwd: repository.path,
+      })) as string;
 
-      const behind = parseInt(
-        (await bashAsync([
-          "git",
-          "rev-list",
-          "--count",
-          "origin..HEAD",
-        ])) as string
-      );
+      if (existsSync(`${repository.path}/.git`)) {
+        let url;
 
-      this.update([
-        {
-          ...repository,
-          behind,
-          url,
-        },
-      ]);
+        if (remote) {
+          try {
+            const [push, pull] = remote.split(" ");
+            const [type, git] = pull.split("\n");
+            const [upstream, _url] = git.split("\t");
+
+            url = _url;
+          } catch (err) {
+            time(`[GIT] analyze ${repository.name} ${err}`, { color: "red" });
+          }
+
+          const behind = parseInt(
+            (await bashAsync(["git", "rev-list", "--count", "origin..HEAD"], {
+              cwd: repository.path,
+            }).catch((er) => `${er}`)) as string
+          );
+
+          this.update([
+            {
+              ...repository,
+              behind,
+              url,
+            },
+          ]);
+        } else {
+          time(`[GIT] ${repository.name} have no remote`, { color: "magenta" });
+        }
+      } else {
+        time(`[GIT] ${repository.name} not found`, { color: "magenta" });
+      }
     }
 
     return this.all();
